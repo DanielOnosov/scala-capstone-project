@@ -5,11 +5,12 @@ import Fresh.*
 import cats.data.State
 
 object Substitution:
-
-  def freeVars(term: Term): Set[String] = term match
-    case Var(n)      => Set(n)
-    case Abs(p, b)   => freeVars(b) - p
-    case App(f, a)   => freeVars(f) ++ freeVars(a)
+  
+  extension (t: Term)
+    def freeVars: Set[String] = t match
+      case Var(n) => Set(n)
+      case Abs(p, b) => b.freeVars - p
+      case App(f, a) => f.freeVars ++ a.freeVars
 
   def substitute(term: Term, x: String, n: Term): Fresh[Term] = term match
 

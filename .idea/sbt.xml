@@ -7,8 +7,8 @@
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
         <option name="modules">
           <set>
-            <option value="$PROJECT_DIR$" />
-            <option value="$PROJECT_DIR$/project" />
+            <option value="D:\scala-course-capstone_project\scala-capstone-project" />
+            <option value="D:\scala-course-capstone_project\scala-capstone-project\project" />
           </set>
         </option>
         <option name="sbtVersion" value="1.12.9" />
