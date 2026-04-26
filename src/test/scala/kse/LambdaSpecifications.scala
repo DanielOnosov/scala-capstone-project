@@ -16,6 +16,7 @@ object GeneralInterpreterSpecification extends Properties("Lambda Calculus Inter
   include(BasicSubstitutionLawsSpecification)
   include(InterpreterLimitsSpecification)
   include(SemanticReductionSpecification)
+  include(ParserSpecification)
 
 end GeneralInterpreterSpecification
 
@@ -192,3 +193,44 @@ object SemanticReductionSpecification extends Properties("Semantic Reduction law
       cbvResult.term == term && cbvResult.stepsTaken == 0
 
 end SemanticReductionSpecification
+
+object ParserSpecification extends Properties("Lambda Calculus Parser"):
+
+  property("Parses standalone variables") = propBoolean:
+    Parser.parse("x") == Right(Var("x")) &&
+      Parser.parse("  varName  ") == Right(Var("varName"))
+
+  property("Parses abstractions with standard \\ and unicode λ") = propBoolean:
+    val expected = Abs("x", Var("x"))
+    Parser.parse("\\x. x") == Right(expected) &&
+      Parser.parse("λx.x") == Right(expected) &&
+      Parser.parse("  λx  .  x  ") == Right(expected)
+
+  property("Parses nested abstractions") = propBoolean:
+    // \x. \y. x
+    val expected = Abs("x", Abs("y", Var("x")))
+    Parser.parse("\\x. \\y. x") == Right(expected)
+
+  property("Parses strictly left-associative applications") = propBoolean:
+    // x y z -> (x y) z
+    val expected = App(App(Var("x"), Var("y")), Var("z"))
+    Parser.parse("x y z") == Right(expected)
+
+  property("Parses parenthesized groupings correctly") = propBoolean:
+    // x (y z)
+    val expected = App(Var("x"), App(Var("y"), Var("z")))
+    Parser.parse("x (y z)") == Right(expected)
+
+  property("Parses the Omega combinator (λx. x x) (λx. x x)") = propBoolean:
+    val expected = App(
+      Abs("x", App(Var("x"), Var("x"))),
+      Abs("x", App(Var("x"), Var("x")))
+    )
+    Parser.parse("(\\x. x x) (\\x. x x)") == Right(expected)
+
+  property("Fails gracefully on invalid syntax") = propBoolean:
+    Parser.parse("\\x x").isLeft &&  // missing dot
+      Parser.parse("(x y").isLeft &&    // missing closing parenthesis
+      Parser.parse("x y .").isLeft      // invalid trailing dot
+
+end ParserSpecification
