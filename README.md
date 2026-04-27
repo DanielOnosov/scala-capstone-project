@@ -38,3 +38,11 @@ To execute all tests, run:
 ```bash
 sbt test
 ```
+
+## Chat logs:
+https://aistudio.google.com/app/prompts?state=%7B%22ids%22:%5B%221ifWKIN5weKKXd0DXL36s4jK-FhB4B-Z-%22%5D,%22action%22:%22open%22,%22userId%22:%22103189012974006674534%22,%22resourceKeys%22:%7B%7D%7D&usp=sharing 
+https://docs.google.com/presentation/d/10DXOoxbypL97NubgS5b0tV7cFL2BC1LkFjapjQc9NTE/edit?slide=id.g34159f8febf_0_51#slide=id.g34159f8febf_0_51
+https://claude.ai/share/d356f540-9229-4084-afa5-f995032f5048
+https://chatgpt.com/share/69ef2967-83f4-8331-929c-7f9fa5e45368
+https://gemini.google.com/share/524ee88fad5c
+https://claude.ai/share/e092de49-07b6-4388-a9bc-8dd3bea5f3b5
