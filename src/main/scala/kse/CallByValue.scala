@@ -5,10 +5,8 @@ import kse.ReductionStrategy.*
 import kse.Substitution.substitute
 import kse.Term.*
 
-// CALL-BY-VALUE - leftmost-innermost, без входу в λ
-//
 // Аргумент ОБОВ'ЯЗКОВО обчислюється до "значення" (λ або Var)
-// перед тим, як відбудеться β-редукція.
+// перед тим, як відбудеться бета-редукція.
 // Всередину λ-абстракцій НЕ заходимо.
 
 object CallByValue extends Strategy:
@@ -19,11 +17,11 @@ object CallByValue extends Strategy:
   private def isValue(t: Term): Boolean = t match
     case Abs(_, _) => true
     case Var(_)    => true
-    case _         => false
+    case _         => false // App(_, _) = false
 
   private def reduce(term: Term): Eval[Option[Term]] = term match
 
-    // β-редукція - тут це для випадку якщо аргумент вже є значенням
+    // бета-редукція - тут це для випадку якщо аргумент вже є значенням
     case App(Abs(x, body), arg) if isValue(arg) =>
       substitute(body, x, arg).map(Some(_))
 

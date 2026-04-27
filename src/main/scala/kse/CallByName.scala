@@ -5,9 +5,8 @@ import kse.ReductionStrategy.*
 import kse.Substitution.substitute
 import kse.Term.*
 
-// CALL-BY-NAME - leftmost-outermost, без входу в λ
-//
-// β-редукція відбувається одразу, аргумент НЕ обчислюється перед підстановкою.
+// Основна суть - без входу в λ
+// бета-редукція відбувається одразу, аргумент НЕ обчислюється перед підстановкою.
 // Всередину λ-абстракцій НЕ заходимо.
 
 object CallByName extends Strategy:
@@ -16,7 +15,7 @@ object CallByName extends Strategy:
 
   private def reduce(term: Term): Eval[Option[Term]] = term match
 
-    // β-редукція - аргумент підставляємо "як є", без попереднього обчислення
+    // бета-редукція - аргумент підставляємо "як є", без попереднього обчислення буквально "lazy" обчислення з підстановкою без обчислювання
     case App(Abs(x, body), arg) =>
       substitute(body, x, arg).map(Some(_))
 
