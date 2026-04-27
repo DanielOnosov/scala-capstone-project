@@ -54,8 +54,8 @@ object ReductionSpecification extends Properties("Reduction laws"):
 
   property("Reduction does not introduce new free variables") = forAll: (term: Term) =>
     val fvBefore = term.freeVars
-    val result = Interpreter.run(term, NormalOrder, MaxStepsLimit)
-    val fvAfter = result.term.freeVars
+    val result   = Interpreter.run(term, NormalOrder, MaxStepsLimit)
+    val fvAfter  = result.term.freeVars
 
     fvAfter.subsetOf(fvBefore)
 
@@ -183,5 +183,5 @@ object SemanticReductionSpecification extends Properties("Semantic Reduction law
 
     cbnResult.term == term && cbnResult.stepsTaken == 0 &&
     cbvResult.term == term && cbvResult.stepsTaken == 0
-  
+
 end SemanticReductionSpecification

@@ -5,6 +5,7 @@ import kse.Term.*
 object AlphaEquivalence:
 
   extension (t1: Term)
+
     def alphaEq(t2: Term): Boolean =
       def loop(term1: Term, term2: Term, env1: Map[String, Int], env2: Map[String, Int], depth: Int): Boolean =
         (term1, term2) match
