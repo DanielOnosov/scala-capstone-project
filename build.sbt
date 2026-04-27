@@ -1,8 +1,19 @@
+import sbt.Keys.libraryDependencies
+
 ThisBuild / version := "0.1.0-SNAPSHOT"
 
 ThisBuild / scalaVersion := "3.8.3"
 
 lazy val root = (project in file("."))
   .settings(
-    name := "scala-capstone-project"
+    name := "scala-capstone-project",
+
+    libraryDependencies ++= Seq(
+      "org.typelevel" %% "cats-core" % "2.12.0",
+      "org.typelevel" %% "cats-effect" % "3.5.4"
+    ),
+    libraryDependencies += "org.scalacheck" %% "scalacheck" % "1.18.1" % Test,
+    libraryDependencies += "org.scalameta" %% "munit" % "1.0.0" % Test,
+    libraryDependencies += "org.scalameta" %% "munit-scalacheck" % "1.0.0" % Test,
+    testFrameworks += new TestFramework("munit.Framework"),
   )
