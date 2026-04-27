@@ -18,22 +18,21 @@ object Parser:
       .replace(")", " ) ")
 
     spaced.split("\\s+").toList.filter(_.nonEmpty).map {
-      case "λ" => Token.Lam
-      case "." => Token.Dot
-      case "(" => Token.LParen
-      case ")" => Token.RParen
+      case "λ"  => Token.Lam
+      case "."  => Token.Dot
+      case "("  => Token.LParen
+      case ")"  => Token.RParen
       case name => Token.Ident(name)
     }
 
   def parse(input: String): Either[String, Term] =
     try
-      val tokens = tokenize(input)
+      val tokens           = tokenize(input)
       val (term, leftover) = parseTerm(tokens)
 
       if leftover.isEmpty then Right(term)
       else Left(s"Syntax error. Unexpected trailing tokens: $leftover")
-    catch
-      case e: Exception => Left(e.getMessage)
+    catch case e: Exception => Left(e.getMessage)
 
   private def parseTerm(tokens: List[Token]): (Term, List[Token]) = tokens match
     case Token.Lam :: Token.Ident(name) :: Token.Dot :: rest =>
@@ -52,7 +51,7 @@ object Parser:
       val (term, restAfterTerm) = parseTerm(rest)
       restAfterTerm match
         case Token.RParen :: tail => (term, tail)
-        case _ => throw new Exception("Missing closing parenthesis ')'")
+        case _                    => throw new Exception("Missing closing parenthesis ')'")
 
     case Nil =>
       throw new Exception("Unexpected end of input")
@@ -62,7 +61,7 @@ object Parser:
 
   @tailrec
   private def parseApp(acc: Term, tokens: List[Token]): (Term, List[Token]) = tokens match
-    case Nil => (acc, Nil)
+    case Nil               => (acc, Nil)
     case Token.RParen :: _ => (acc, tokens)
     case _ =>
       val (nextAtom, rest) = parseAtom(tokens)

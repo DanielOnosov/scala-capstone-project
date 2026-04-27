@@ -1,14 +1,15 @@
 package kse
 
-import Term.*
 import Fresh.*
+import Term.*
 import cats.data.State
 
 object Substitution:
-  
+
   extension (t: Term)
+
     def freeVars: Set[String] = t match
-      case Var(n) => Set(n)
+      case Var(n)    => Set(n)
       case Abs(p, b) => b.freeVars - p
       case App(f, a) => f.freeVars ++ a.freeVars
 
@@ -38,7 +39,7 @@ object Substitution:
     case Abs(p, body) =>
       val avoid = freeVars(n) ++ freeVars(body) + x + p
       for
-        z <- freshVar(avoid)
+        z       <- freshVar(avoid)
         renamed <- substitute(body, p, Var(z))
-        res <- substitute(renamed, x, n)
+        res     <- substitute(renamed, x, n)
       yield Abs(z, res)
