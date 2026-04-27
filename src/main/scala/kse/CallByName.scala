@@ -1,9 +1,9 @@
 package kse
 
 import cats.data.State
-import kse.Term.*
-import kse.Substitution.substitute
 import kse.ReductionStrategy.*
+import kse.Substitution.substitute
+import kse.Term.*
 
 // CALL-BY-NAME - leftmost-outermost, без входу в λ
 //

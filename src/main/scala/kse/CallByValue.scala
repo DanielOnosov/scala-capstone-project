@@ -18,8 +18,8 @@ object CallByValue extends Strategy:
   // Значення в CBV - λ-абстракція або змінна (не може бути далі зменшене)
   private def isValue(t: Term): Boolean = t match
     case Abs(_, _) => true
-    case Var(_) => true
-    case _ => false
+    case Var(_)    => true
+    case _         => false
 
   private def reduce(term: Term): Eval[Option[Term]] = term match
 
@@ -37,4 +37,4 @@ object CallByValue extends Strategy:
 
     // λ і Var - вже значення, нічого не робимо
     case Abs(_, _) => State.pure(None)
-    case Var(_) => State.pure(None)
+    case Var(_)    => State.pure(None)

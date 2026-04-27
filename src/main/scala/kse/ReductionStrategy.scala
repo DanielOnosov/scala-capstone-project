@@ -1,8 +1,8 @@
 package kse
 
 import cats.data.State
-import kse.Term.*
 import kse.Substitution.*
+import kse.Term.*
 
 object ReductionStrategy:
 
