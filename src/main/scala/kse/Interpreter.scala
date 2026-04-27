@@ -20,4 +20,3 @@ object Interpreter:
 
   def run(term: Term, strategy: Strategy, maxSteps: Int): ReductionResult =
     evaluateExtended(term, strategy, maxSteps).run(0).value._2
-    

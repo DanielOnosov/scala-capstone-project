@@ -8,6 +8,10 @@ object Fresh:
 
   def freshVar(avoid: Set[String]): Fresh[String] =
     State { i =>
-      val name = LazyList.from(i).map(n => s"_v$n").dropWhile(avoid).head
-      (i + 1, name)
+      val (name, j) = LazyList
+        .from(i)
+        .map(n => (s"_v$n", n))
+        .dropWhile((s, _) => avoid(s))
+        .head
+      (j + 1, name)
     }

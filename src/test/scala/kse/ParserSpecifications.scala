@@ -1,27 +1,29 @@
 package kse
 
-import kse.Term.*
-import kse.Generators.given
 import kse.AlphaEquivalence.*
+import kse.Generators.given
+import kse.Term.*
 import org.scalacheck.Prop.{forAll, propBoolean}
 import org.scalacheck.Properties
 
 object ParserSpecification extends Properties("Parser"):
+
   extension (t: Term)
+
     def show: String = t match
-      case Var(n) => n
+      case Var(n)    => n
       case Abs(p, b) => s"(λ$p. ${b.show})"
       case App(f, a) => s"(${f.show} ${a.show})"
 
   property("Parses standalone variables") = propBoolean:
     Parser.parse("x") == Right(Var("x")) &&
-      Parser.parse("  varName  ") == Right(Var("varName"))
+    Parser.parse("  varName  ") == Right(Var("varName"))
 
   property("Parses abstractions with standard \\ and unicode λ") = propBoolean:
     val expected = Abs("x", Var("x"))
     Parser.parse("\\x. x") == Right(expected) &&
-      Parser.parse("λx.x") == Right(expected) &&
-      Parser.parse("  λx  .  x  ") == Right(expected)
+    Parser.parse("λx.x") == Right(expected) &&
+    Parser.parse("  λx  .  x  ") == Right(expected)
 
   property("Parses nested abstractions") = propBoolean:
     // \x. \y. x
@@ -39,20 +41,17 @@ object ParserSpecification extends Properties("Parser"):
     Parser.parse("x (y z)") == Right(expected)
 
   property("Parses the Omega combinator (λx. x x) (λx. x x)") = propBoolean:
-    val expected = App(
-      Abs("x", App(Var("x"), Var("x"))),
-      Abs("x", App(Var("x"), Var("x")))
-    )
+    val expected = App(Abs("x", App(Var("x"), Var("x"))), Abs("x", App(Var("x"), Var("x"))))
     Parser.parse("(\\x. x x) (\\x. x x)") == Right(expected)
 
   property("Fails gracefully on invalid syntax") = propBoolean:
     Parser.parse("\\x x").isLeft && // missing dot
-      Parser.parse("(x y").isLeft && // missing closing parenthesis
-      Parser.parse("x y .").isLeft // invalid trailing dot
+    Parser.parse("(x y").isLeft &&  // missing closing parenthesis
+    Parser.parse("x y .").isLeft    // invalid trailing dot
 
   property("Round-trip property: parse(show(term)) == Right(term)") = forAll: (term: Term) =>
     val serialized = term.show
-    val parsed = Parser.parse(serialized)
+    val parsed     = Parser.parse(serialized)
 
     parsed == Right(term)
 
@@ -74,8 +73,8 @@ object ParserSpecification extends Properties("Parser"):
     Parser.parse("x (y z)") == expected
 
   property("Syntax errors are handled gracefully (Left)") = propBoolean:
-    Parser.parse("(x y").isLeft && // незакрита дужка
-      Parser.parse("\\x y").isLeft && // пропущена крапка
-      Parser.parse("x )").isLeft // зайва дужка
+    Parser.parse("(x y").isLeft &&  // незакрита дужка
+    Parser.parse("\\x y").isLeft && // пропущена крапка
+    Parser.parse("x )").isLeft      // зайва дужка
 
 end ParserSpecification

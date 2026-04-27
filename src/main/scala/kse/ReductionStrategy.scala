@@ -5,15 +5,15 @@ import kse.Substitution.*
 import kse.Term.*
 
 object ReductionStrategy:
-  
+
   // EFFECT TYPE
   // State = fresh variable supply + step counter (we can reuse same Int)
   type Eval[A] = State[Int, A]
-  
+
   // STRATEGY ABSTRACTION
   trait Strategy:
     def step(t: Term): Eval[Option[Term]]
-  
+
   // NORMAL ORDER (LEFTMOST-OUTERMOST)
   object NormalOrder extends Strategy:
 
