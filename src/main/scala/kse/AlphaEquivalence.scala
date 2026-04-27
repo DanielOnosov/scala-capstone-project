@@ -6,7 +6,6 @@ object AlphaEquivalence:
 
   extension (t1: Term)
     def alphaEq(t2: Term): Boolean =
-      // Використовуємо рівні де Брьойна для порівняння
       def loop(term1: Term, term2: Term, env1: Map[String, Int], env2: Map[String, Int], depth: Int): Boolean =
         (term1, term2) match
           // Якщо це змінні, вони або обидві зв'язані на однаковій глибині, або обидві вільні з однаковим ім'ям

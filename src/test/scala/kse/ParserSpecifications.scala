@@ -7,7 +7,6 @@ import org.scalacheck.Prop.{forAll, propBoolean}
 import org.scalacheck.Properties
 
 object ParserSpecification extends Properties("Parser"):
-  // Допоміжний метод для серіалізації AST у рядок (додає дужки для однозначності)
   extension (t: Term)
     def show: String = t match
       case Var(n) => n

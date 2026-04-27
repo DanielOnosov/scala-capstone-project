@@ -6,13 +6,11 @@ import org.scalacheck.{Arbitrary, Gen}
 
 object Generators:
 
-  // 1. Генератор імен змінних (використовуємо обмежений набір, щоб збільшити шанс колізій і перевірити Substitution)
   val varNameGen: Gen[String] = Gen.oneOf("x", "y", "z", "a", "b", "c")
 
-  // 2. Базовий генератор змінних
   val varGen: Gen[Term] = varNameGen.map(Var.apply)
 
-  // 3. Рекурсивний генератор дерев термів з контролем глибини
+  // Рекурсивний генератор дерев термів з контролем глибини
   def termGen(maxDepth: Int): Gen[Term] =
     if maxDepth <= 0 then varGen
     else
@@ -34,5 +32,4 @@ object Generators:
         ),
       )
 
-  // 4. Оголошуємо Arbitrary (стандартний тайпклас ScalaCheck) для Term
   given Arbitrary[Term] = Arbitrary(Gen.sized(size => termGen(math.min(size, 7))))

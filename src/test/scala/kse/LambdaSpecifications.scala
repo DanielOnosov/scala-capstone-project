@@ -80,7 +80,6 @@ object StrategySpecification extends Properties("Evaluation Strategy specifics")
   // (λz. y) Ω
   val testTerm: Term = App(constF, omega)
 
-  // propBoolean дозволяє написати тест без генераторів, базуючись на фіксованих значеннях
   property("Call-By-Value always evaluates arguments (loops on Omega)") = propBoolean:
     val cbvResult = Interpreter.run(testTerm, CallByValue, 100)
 
@@ -172,7 +171,6 @@ object SemanticReductionSpecification extends Properties("Semantic Reduction law
 
     val result = Interpreter.run(term, NormalOrder, 10)
 
-    // Normal order заходить під лямбду і редукує (\y.y) z до z
     result.term == Abs("x", Var("z"))
 
   property("Call By Value and Call By Name DO NOT reduce under lambda abstractions") = propBoolean:
@@ -183,7 +181,6 @@ object SemanticReductionSpecification extends Properties("Semantic Reduction law
     val cbnResult = Interpreter.run(term, CallByName, 10)
     val cbvResult = Interpreter.run(term, CallByValue, 10)
 
-    // Обидві стратегії не повинні заходити в тіло лямбди
     cbnResult.term == term && cbnResult.stepsTaken == 0 &&
     cbvResult.term == term && cbvResult.stepsTaken == 0
   
