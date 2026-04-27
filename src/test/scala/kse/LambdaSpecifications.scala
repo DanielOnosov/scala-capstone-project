@@ -18,6 +18,7 @@ object GeneralInterpreterSpecification extends Properties("Lambda Calculus Inter
   include(InterpreterLimitsSpecification)
   include(SemanticReductionSpecification)
   include(ParserSpecification)
+  include(AlphaConversionSpecifications)
 
 end GeneralInterpreterSpecification
 
@@ -46,23 +47,23 @@ object ReductionSpecification extends Properties("Reduction laws"):
   val MaxStepsLimit = 30
 
   property("Normal Order evaluation is deterministic") = forAll: (term: Term) =>
-    val run1 = Interpreter.evaluateExtended(term, NormalOrder, MaxStepsLimit).runA(0).value
-    val run2 = Interpreter.evaluateExtended(term, NormalOrder, MaxStepsLimit).runA(0).value
+    val run1 = Interpreter.run(term, NormalOrder, MaxStepsLimit)
+    val run2 = Interpreter.run(term, NormalOrder, MaxStepsLimit)
 
     run1 == run2
 
   property("Reduction does not introduce new free variables") = forAll: (term: Term) =>
     val fvBefore = term.freeVars
-    val result   = Interpreter.evaluateExtended(term, NormalOrder, MaxStepsLimit).runA(0).value
-    val fvAfter  = result.term.freeVars
+    val result = Interpreter.run(term, NormalOrder, MaxStepsLimit)
+    val fvAfter = result.term.freeVars
 
     fvAfter.subsetOf(fvBefore)
 
   property("A term in Normal Form cannot be reduced further") = forAll: (term: Term) =>
-    val firstPass = Interpreter.evaluateExtended(term, NormalOrder, MaxStepsLimit).runA(0).value
+    val firstPass = Interpreter.run(term, NormalOrder, MaxStepsLimit)
 
     if firstPass.isNormalForm then
-      val secondPass = Interpreter.evaluateExtended(firstPass.term, NormalOrder, MaxStepsLimit).runA(0).value
+      val secondPass = Interpreter.run(firstPass.term, NormalOrder, MaxStepsLimit)
       secondPass.stepsTaken == 0 && secondPass.term == firstPass.term
     else true // Пропускаємо перевірку, якщо нормальна форма ще не досягнута
 
@@ -81,12 +82,12 @@ object StrategySpecification extends Properties("Evaluation Strategy specifics")
 
   // propBoolean дозволяє написати тест без генераторів, базуючись на фіксованих значеннях
   property("Call-By-Value always evaluates arguments (loops on Omega)") = propBoolean:
-    val cbvResult = Interpreter.evaluateExtended(testTerm, CallByValue, 100).runA(0).value
+    val cbvResult = Interpreter.run(testTerm, CallByValue, 100)
 
     !cbvResult.isNormalForm && cbvResult.stepsTaken == 100
 
   property("Call-By-Name avoids evaluating unused arguments (terminates on Omega)") = propBoolean:
-    val cbnResult = Interpreter.evaluateExtended(testTerm, CallByName, 100).runA(0).value
+    val cbnResult = Interpreter.run(testTerm, CallByName, 100)
 
     cbnResult.isNormalForm && cbnResult.term == Var("y")
 
@@ -128,12 +129,12 @@ end BasicSubstitutionLawsSpecification
 object InterpreterLimitsSpecification extends Properties("Interpreter Limits laws"):
 
   property("If maxSteps is 0, evaluation halts immediately and is not in Normal Form") = forAll: (term: Term) =>
-    val result = Interpreter.evaluateExtended(term, NormalOrder, 0).runA(0).value
+    val result = Interpreter.run(term, NormalOrder, 0)
 
     result.stepsTaken == 0 && !result.isNormalForm
 
   property("A single Variable evaluates in 0 steps and is already in Normal Form") = forAll: (name: String) =>
-    val result = Interpreter.evaluateExtended(Var(name), NormalOrder, 10).runA(0).value
+    val result = Interpreter.run(Var(name), NormalOrder, 10)
 
     result.stepsTaken == 0 && result.isNormalForm
 
@@ -150,7 +151,7 @@ object SemanticReductionSpecification extends Properties("Semantic Reduction law
   property("Applying Identity function to any argument N yields N in EXACTLY 1 step (CBN)") = forAll: (arg: Term) =>
     val term = App(idFunc, arg)
 
-    // Перевіряємо рівно ОДИН крок стратегії напряму, без циклу evaluateExtended
+    // Перевіряємо рівно ОДИН крок стратегії напряму, без циклу run
     val singleStepResult = CallByName.step(term).runA(0).value
 
     // Результатом одного кроку має бути Some(arg)
@@ -169,7 +170,7 @@ object SemanticReductionSpecification extends Properties("Semantic Reduction law
     val nestedIdentity = App(Abs("y", Var("y")), Var("z"))
     val term           = Abs("x", nestedIdentity)
 
-    val result = Interpreter.evaluateExtended(term, NormalOrder, 10).runA(0).value
+    val result = Interpreter.run(term, NormalOrder, 10)
 
     // Normal order заходить під лямбду і редукує (\y.y) z до z
     result.term == Abs("x", Var("z"))
@@ -179,49 +180,11 @@ object SemanticReductionSpecification extends Properties("Semantic Reduction law
     val nestedIdentity = App(Abs("y", Var("y")), Var("z"))
     val term           = Abs("x", nestedIdentity)
 
-    val cbnResult = Interpreter.evaluateExtended(term, CallByName, 10).runA(0).value
-    val cbvResult = Interpreter.evaluateExtended(term, CallByValue, 10).runA(0).value
+    val cbnResult = Interpreter.run(term, CallByName, 10)
+    val cbvResult = Interpreter.run(term, CallByValue, 10)
 
     // Обидві стратегії не повинні заходити в тіло лямбди
     cbnResult.term == term && cbnResult.stepsTaken == 0 &&
     cbvResult.term == term && cbvResult.stepsTaken == 0
-
+  
 end SemanticReductionSpecification
-
-object ParserSpecification extends Properties("Lambda Calculus Parser"):
-
-  property("Parses standalone variables") = propBoolean:
-    Parser.parse("x") == Right(Var("x")) &&
-    Parser.parse("  varName  ") == Right(Var("varName"))
-
-  property("Parses abstractions with standard \\ and unicode λ") = propBoolean:
-    val expected = Abs("x", Var("x"))
-    Parser.parse("\\x. x") == Right(expected) &&
-    Parser.parse("λx.x") == Right(expected) &&
-    Parser.parse("  λx  .  x  ") == Right(expected)
-
-  property("Parses nested abstractions") = propBoolean:
-    // \x. \y. x
-    val expected = Abs("x", Abs("y", Var("x")))
-    Parser.parse("\\x. \\y. x") == Right(expected)
-
-  property("Parses strictly left-associative applications") = propBoolean:
-    // x y z -> (x y) z
-    val expected = App(App(Var("x"), Var("y")), Var("z"))
-    Parser.parse("x y z") == Right(expected)
-
-  property("Parses parenthesized groupings correctly") = propBoolean:
-    // x (y z)
-    val expected = App(Var("x"), App(Var("y"), Var("z")))
-    Parser.parse("x (y z)") == Right(expected)
-
-  property("Parses the Omega combinator (λx. x x) (λx. x x)") = propBoolean:
-    val expected = App(Abs("x", App(Var("x"), Var("x"))), Abs("x", App(Var("x"), Var("x"))))
-    Parser.parse("(\\x. x x) (\\x. x x)") == Right(expected)
-
-  property("Fails gracefully on invalid syntax") = propBoolean:
-    Parser.parse("\\x x").isLeft && // missing dot
-    Parser.parse("(x y").isLeft &&  // missing closing parenthesis
-    Parser.parse("x y .").isLeft    // invalid trailing dot
-
-end ParserSpecification
