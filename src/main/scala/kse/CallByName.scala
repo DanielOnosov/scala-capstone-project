@@ -5,9 +5,11 @@ import kse.ReductionStrategy.*
 import kse.Substitution.substitute
 import kse.Term.*
 
-// Основна суть - без входу в λ
+import scala.language.postfixOps
+
+// Основна суть - без входу в λ - ххахахахах уже ні :)
 // бета-редукція відбувається одразу, аргумент НЕ обчислюється перед підстановкою.
-// Всередину λ-абстракцій НЕ заходимо.
+// Всередину λ-абстракцій НЕ заходимо. - уже ні
 
 object CallByName extends Strategy:
 
@@ -15,14 +17,21 @@ object CallByName extends Strategy:
 
   private def reduce(term: Term): Eval[Option[Term]] = term match
 
-    // бета-редукція - аргумент підставляємо "як є", без попереднього обчислення буквально "lazy" обчислення з підстановкою без обчислювання
     case App(Abs(x, body), arg) =>
       substitute(body, x, arg).map(Some(_))
 
-    // App - тільки функція може бути зменшена; аргумент не чіпаємо
     case App(func, arg) =>
-      reduce(func).map(_.map(App(_, arg)))
+      reduce(func).flatMap {
+        case Some(f) => State.pure(Some(App(f, arg)))
+        case None    => reduce(arg).map(_.map(App(func, _)))
+      }
 
-    // λ і Var - вже в нормальній формі для CBN
-    case Abs(_, _) => State.pure(None)
-    case Var(_)    => State.pure(None)
+    case Abs(x, body) =>
+      reduce(body).map(_.map(Abs(x, _)))
+
+    case Var(_) =>
+      State.pure(None)
+
+//це фактично NormalOrder - різниця між ними зникла. 
+//Єдине що лишилось концептуально відрізняє: в App(func, arg) CBN спочатку вичерпує func
+//і тільки потім береться за arg, тоді як різниця з NormalOrder тут суто в порядку який співпадає

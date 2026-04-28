@@ -3,6 +3,7 @@ package kse
 import Fresh.*
 import Term.*
 import cats.data.State
+import kse.Substitution.*
 
 object Substitution:
 

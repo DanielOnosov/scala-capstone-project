@@ -57,3 +57,9 @@ extension (t: Term)
     s"[Call-By-Value] Результат: ${resCBV.term.show} | Кроків: ${resCBV.stepsTaken} | Нормальна форма: ${resCBV.isNormalForm}"
   )
   println("==============================================")
+
+  val res = Parser.parse("(λx.λy.λz. x (y z)) (λf.λx.f(f(f(f(f(f(x))))))) (λf.λx.f(f(f(x))))").toOption.get
+  val (_, resMul) = Interpreter.evaluateExtended(res, CallByName, 100).run(0).value
+  println(
+    s"[Call-By-Name] Результат: ${resMul.term.show}"
+  )
