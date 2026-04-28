@@ -1,8 +1,8 @@
 package kse
 
-import kse.Term.*
-import kse.Generators.given
 import kse.AlphaEquivalence.*
+import kse.Generators.given
+import kse.Term.*
 import org.scalacheck.Prop.{forAll, propBoolean}
 import org.scalacheck.Properties
 
@@ -26,7 +26,7 @@ object AlphaConversionSpecifications extends Properties("Alpha Conversion (Alpha
     t1.alphaEq(t2) && !t1.alphaEq(t3)
 
   property("Different structure means NOT alpha-equivalent") = propBoolean:
-    val t1 = Abs("x", Var("x")) // λx.x
+    val t1 = Abs("x", Var("x"))      // λx.x
     val t2 = App(Var("x"), Var("x")) // x x
     !t1.alphaEq(t2)
 
